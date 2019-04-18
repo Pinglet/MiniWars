@@ -1,7 +1,4 @@
 class Vector {
-    xVal = 0;
-    yVal = 0;
-
     constructor(x, y) {
         this.xVal = x;
         this.yVal = y;
@@ -22,6 +19,10 @@ class Vector {
     set y(value) {
         this.yVal = value;
     }
+
+    sameVector(vector) {
+        return (this.x === vector.x && this.y === vector.y);
+    }
     
     getEuclids(vector) {
         var dx = this.xVal - vector.x;
@@ -29,3 +30,5 @@ class Vector {
         return Math.sqrt(dx*dx+dy*dy);
     }
 }
+
+module.exports = Vector;

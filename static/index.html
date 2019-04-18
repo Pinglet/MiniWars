@@ -5,19 +5,14 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     <script src="http://localhost:3000/socket.io/socket.io.js"></script>
-    <script src="client/Client.js"></script>
-    <script src="client/Camera.js"></script>
-    <script src="Vector.js"></script>
-    <script src="Entity.js"></script>
-    <script src="client/ClientGame.js"></script>
-    <script src="client/Inputs.js"></script>
-
+    <script src="client_bin/client_side.js"></script>
     <title>MiniWar</title>
 </head>
 <body>
     <div class="GameDiv" id="gameDiv" style="width: 800px; height: 600px;">
         <canvas id="game" width="800" height="600" style="width: 100%; height: 100%;"></canvas>
         <script>window.onload = init()</script>
+        <!-- <input id="clickMe" type="button" value="clickme" onclick="init();" /> -->
     </div>
 </body>
 </html>

@@ -5,8 +5,17 @@ var app = express();
 var server = http.Server(app);
 var io = require('socket.io').listen(server);
 var ServerGame = require('./ServerGame');
+var Entity = require('../Entity');
 
+var game;
 var lastTime = Date.now();
+
+function makeCounter() {
+    var i = 0;
+    return function() {
+        return i++;
+    }
+}
 
 app.set('port', 3000);
 
@@ -18,35 +27,73 @@ app.get('/', function(request, response) {
 });
 
 // Starts the server.
-server.listen(3000, function() {
+server.listen(3000, () => {
     console.log('Starting server on port 3000');
     
     thing = setInterval(loop, 10);
-    game = new ServerGame(1000, 1000);
+    game = new ServerGame(1000, 1000, io);
 });
 
-var players = {};
 io.on('connection', function(socket) {
+
     socket.on('new player', function() {
-        players[socket.id] = {x: 300, y: 300};
+        game.objects[socket.id] = {};
+        console.log(socket.id);
         socket.emit('new game', {"width":game.gameWidth, "height":game.gameHeight});
+        for (sid in game.objects) {
+            for (oid in game.objects[sid]) {
+                game.updateObject(sid, oid)
+            }
+        }
     });
-    socket.on('movement', function(data) {
-        var player = players[socket.id] || {};
-        if (data.left) {
-          player.x -= 5;
-        }
+
+    socket.on('disconnect', () => {
+        disconnectPlayer(socket.id);
+    });
+
+    socket.on('mouse click', function(data) {
+        newObject(socket.id, data.mx, data.my, 20, 0);
+    });
+
+    socket.on('movement', (data) => {
+        var xv = 0; 
+        var yv = 0;
         if (data.up) {
-          player.y -= 5;
-        }
-        if (data.right) {
-          player.x += 5;
+            yv -= 1;
         }
         if (data.down) {
-          player.y += 5;
+            yv += 1;
+        }
+        if (data.left) {
+            xv -= 1;
+        }
+        if (data.right) {
+            xv += 1;
+        }
+
+        for (oid in game.objects[socket.id]) {
+            game.objects[socket.id][oid].pos.x += xv;
+            game.objects[socket.id][oid].pos.y += yv;
+            game.objects[socket.id][oid].moved = true;
+            game.updateObject(socket.id, oid);
         }
     });
 });
+
+function disconnectPlayer(id) {
+    delete game.objects[id];
+    io.sockets.emit('delete player', id);
+}
+
+var newOid = makeCounter();
+
+function newObject(sid, x, y, size, rotation) {
+    var oid = newOid()
+    var obj = new Entity(x, y, size, rotation);
+    game.objects[sid][oid] = obj;
+    io.sockets.emit('object', {id:sid, oid:oid, obj:game.createPacket(obj)}); 
+    console.log(obj.shape);   
+}
 
 function loop() {
     var dt = calculateDT();
@@ -54,7 +101,7 @@ function loop() {
 }
 
 function update(dt) {
-    io.sockets.emit('state', players);
+    game.update(dt);
 }
 
 function calculateDT() {

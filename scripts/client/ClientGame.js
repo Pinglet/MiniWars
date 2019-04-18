@@ -1,3 +1,7 @@
+var Camera = require('./Camera');
+var Entity = require('../Entity');
+var Shape = require('../Shape');
+
 const States = Object.freeze({
     ACTIVE:   Symbol("active"),
     PREGAME:  Symbol("pre"),
@@ -5,43 +9,36 @@ const States = Object.freeze({
 });
 
 class ClientGame {
-
-    canvas;
-    cxt;
-    camera;
-
-    state = States.PREGAME;
-
-    gameWidth;
-    gameHeight;
-
-    objects = {};
-
-    constructor() {
+    
+    constructor(client) {
+        this.objects = {};
         this.canvas = document.getElementById("game")
         this.cxt = this.canvas.getContext("2d", {alpha: false});
         this.camera = new Camera(this);
-        this.camera.setZoom(0.5);      
+        this.camera.setZoom(1);  
+        this.state = States.PREGAME;
+        this.client = client;
+        this.movement = {
+            up: false,
+            down: false,
+            left: false,
+            right: false
+        }
     }
 
     loop() {
-        this.update();
         this.draw();
-    }
-
-    update() {
-
     }
 
     draw() {
         this.cxt.fillStyle = "black";
         this.cxt.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.camera.push()
-        // console.log(this.objects);
         for (var id in this.objects) {
             var player = this.objects[id];
-            this.cxt.fillStyle = "white";
-            this.cxt.fillRect(player.x, player.y, 50, 50);
+            for (var oid in player) { 
+                Shape[this.objects[id][oid].shape].draw(this.cxt, this.objects[id][oid]);
+            }
         }
         this.camera.pop();
     }
@@ -51,3 +48,5 @@ class ClientGame {
         this.gameHeight = height;
     }
 }
+
+module.exports = ClientGame;
