@@ -57,5 +57,5 @@ module.exports = {
         var radiisum = radii + 1;
         obj1.pos.x = obj2.pos.x + (radiisum * xunit || 1); 
         obj1.pos.y = obj2.pos.y + (radiisum * yunit || 1);
-    }
+    },
 }

@@ -20,8 +20,18 @@ class Vector {
         this.yVal = value;
     }
 
+    setZero() {
+        this.x = 0;
+        this.y = 0;
+    }
+
     sameVector(vector) {
         return (this.x === vector.x && this.y === vector.y);
+    }
+
+    addVector(vector) {
+        this.x += vector.x;
+        this.y += vector.y;
     }
     
     getEuclids(vector) {

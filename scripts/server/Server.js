@@ -6,6 +6,7 @@ var server = http.Server(app);
 var io = require('socket.io').listen(server);
 var ServerGame = require('./ServerGame');
 var Entity = require('../Entity');
+var Vector = require ('../Vector');
 
 var game;
 var lastTime = Date.now();
@@ -59,22 +60,21 @@ io.on('connection', function(socket) {
         var xv = 0; 
         var yv = 0;
         if (data.up) {
-            yv -= 1;
+            yv -= 20;
         }
         if (data.down) {
-            yv += 1;
+            yv += 20;
         }
         if (data.left) {
-            xv -= 1;
+            xv -= 20;
         }
         if (data.right) {
-            xv += 1;
+            xv += 20;
         }
 
         for (oid in game.objects[socket.id]) {
-            game.objects[socket.id][oid].pos.x += xv;
-            game.objects[socket.id][oid].pos.y += yv;
-            game.objects[socket.id][oid].moved = true;
+            game.objects[socket.id][oid].addForce(new Vector(xv, yv));
+            game.checkCollisions(socket.id, oid, game.objects[socket.id][oid]);
             game.updateObject(socket.id, oid);
         }
     });
@@ -97,6 +97,7 @@ function newObject(sid, x, y, size, rotation) {
 
 function loop() {
     var dt = calculateDT();
+    // console.log(dt);
     update(dt);
 }
 
@@ -108,5 +109,5 @@ function calculateDT() {
     let now = Date.now();
     let dt = now - lastTime;
     lastTime = now;
-    return dt;
+    return dt/10;
 }

@@ -1,6 +1,5 @@
 var Entity = require('../Entity');
 var Shape = require('../Shape.js');
-var Server = require('./Server');
 
 const States = Object.freeze({
     ACTIVE:   Symbol("active"),
@@ -28,8 +27,16 @@ class ServerGame {
                 // // Update the moved checksum
                 // obj1.setOldPos();
 
-                if (obj1.moved) {
-                    this.checkCollisions(id, oid, obj1);
+                /* UPDATE CHECKSUM */
+                obj1.setOldPos();
+
+                /* UPDATE OBJECT MOVING FROM FORCES HERE */
+                obj1.update(dt);
+
+                /* CHECK IF CHECKSUM IS DIFFERENT */
+                if (obj1.isMoved()) {
+                    // console.log(obj1.moved);
+                    this.checkCollisions(obj1);
                 }
             }
         }
@@ -43,14 +50,11 @@ class ServerGame {
                 if (!obj1 || !obj2 || obj1 === obj2) {
                     continue;
                 }
-                // console.log({obj1, obj2});
                 var collision = Shape.isCollide(obj1, obj2);
                 if (collision) {
                     Shape.resolveCollision(obj1, obj2, collision);
                     this.updateObject(id, oid);
                     this.updateObject(id2, oid2);
-                } else {
-                    obj1.moved = false;
                 }
             }
         }
